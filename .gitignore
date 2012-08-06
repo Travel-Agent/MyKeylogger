@@ -14,3 +14,12 @@
 # Excuse file
 *.exe
 *.dll
+
+# etc file
+*.pch
+*.obj
+*.idb
+*.ilk
+*.pdb
+*.exp
+*.lib
