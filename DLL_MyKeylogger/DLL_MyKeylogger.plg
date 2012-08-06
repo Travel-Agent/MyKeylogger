@@ -1,0 +1,34 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: DLL_MyKeylogger - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP13E.tmp" with contents
+[
+/nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "DLL_MYKEYLOGGER_EXPORTS" /Fp"Release/DLL_MyKeylogger.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c 
+"C:\Documents and Settings\Administrator\My Documents\My Project\20120801 MyKeylogger\DLL_MyKeylogger\main.cpp"
+]
+Creating command line "cl.exe @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP13E.tmp" 
+Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP13F.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /incremental:no /pdb:"Release/DLL_MyKeylogger.pdb" /machine:I386 /def:"..\def.def" /out:"Release/DLL_MyKeylogger.dll" /implib:"Release/DLL_MyKeylogger.lib" 
+".\Release\main.obj"
+]
+Creating command line "link.exe @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP13F.tmp"
+<h3>Output Window</h3>
+Compiling...
+main.cpp
+Linking...
+   Creating library Release/DLL_MyKeylogger.lib and object Release/DLL_MyKeylogger.exp
+DLL_MyKeylogger.exp : warning LNK4070: /OUT:definition.dll directive in .EXP differs from output filename "Release/DLL_MyKeylogger.dll"; ignoring directive
+
+
+
+<h3>Results</h3>
+DLL_MyKeylogger.dll - 0 error(s), 1 warning(s)
+</pre>
+</body>
+</html>
